@@ -1,156 +1,207 @@
-# StyleAI Backend
+# 🎨 StyleAI — AI Personal Stylist
 
-AI-powered personal stylist — FastAPI backend.
-
----
-
-## Quick Start (5 minutes)
-
-### 1. Install dependencies
-
-```bash
-pip install uv
-uv sync
-```
-
-### 2. Configure environment
-
-```bash
-cp .env.example .env
-# Edit .env and add:
-#   ANTHROPIC_API_KEY=sk-ant-...   (get from console.anthropic.com)
-#   HF_TOKEN=hf_...                (get from huggingface.co/settings/tokens)
-```
-
-### 3. Start services (Postgres + Qdrant + Redis)
-
-```bash
-docker compose up -d
-```
-
-### 4. Run database migrations
-
-```bash
-alembic upgrade head
-```
-
-### 5. Start the server
-
-```bash
-uvicorn app.main:app --reload
-```
-
-Open **http://localhost:8000/docs** — you'll see the interactive API.
+> Your AI-powered fashion assistant built with FastAPI + FashionCLIP + Claude + Next.js
+> Built in Tunisia 🇹🇳 — A fashion marketplace for the future
 
 ---
 
-## API Overview
-
-| Method | Endpoint | What it does |
-|--------|----------|--------------|
-| `GET` | `/health` | Server status |
-| `POST` | `/wardrobe/upload` | Upload a clothing photo → AI tags it |
-| `GET` | `/wardrobe` | List all your clothing items |
-| `PATCH` | `/wardrobe/{id}` | Correct an AI-detected tag |
-| `DELETE` | `/wardrobe/{id}` | Remove an item |
-| `GET` | `/recommendations/today` | Get today's outfit |
-| `POST` | `/recommendations/{id}/feedback` | Like / skip / worn_today |
-| `GET` | `/recommendations/history` | Past outfits |
-| `POST` | `/chat` | Chat with the AI stylist |
-
----
-
-## Try it right now (curl)
-
-```bash
-# Check the server is running
-curl http://localhost:8000/health
-
-# Upload a clothing photo
-curl -X POST http://localhost:8000/wardrobe/upload \
-  -F "file=@/path/to/your/shirt.jpg"
-
-# Get today's recommendation (after uploading 3+ items)
-curl "http://localhost:8000/recommendations/today?occasion=casual"
-
-# Chat with the stylist
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "What should I wear to a job interview today?", "history": []}'
-```
-
----
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 styleai/
-├── app/
-│   ├── main.py                  # FastAPI app + startup
-│   ├── core/
-│   │   └── config.py            # Settings from .env
-│   ├── db/
-│   │   └── database.py          # SQLAlchemy engine + session
-│   ├── models/
-│   │   ├── user.py              # User table
-│   │   ├── wardrobe.py          # WardrobeItem table
-│   │   └── recommendation.py    # OutfitRecommendation table
-│   ├── schemas/
-│   │   ├── wardrobe.py          # Pydantic request/response models
-│   │   └── recommendation.py
-│   ├── ai/
-│   │   ├── clip_tagger.py       # FashionCLIP zero-shot classifier
-│   │   ├── color_extractor.py   # Dominant color extraction
-│   │   └── stylist.py           # Claude-powered explanation generator
-│   └── services/
-│       ├── weather.py           # Open-Meteo weather fetcher
-│       ├── outfit_scorer.py     # Rule-based outfit combination scorer
-│       └── qdrant_service.py    # Vector DB operations
-├── migrations/
-│   └── 001_initial.py           # Initial DB schema
-├── tests/
-├── uploads/                     # Clothing photos saved here
-├── docker-compose.yml           # Postgres + Qdrant + Redis
-├── pyproject.toml               # Dependencies
-├── .env.example                 # Config template
-└── Makefile                     # Dev shortcuts
+├── backend/          ← Python API (FastAPI + AI)
+│   ├── app/
+│   │   ├── ai/           ← FashionCLIP + Claude stylist
+│   │   ├── api/          ← API routes (wardrobe, chat, recommendations)
+│   │   ├── db/           ← Database models + connection
+│   │   ├── schemas/      ← Data validation
+│   │   ├── services/     ← Weather, Qdrant
+│   │   └── main.py       ← App entry point
+│   ├── migrations/       ← Database migrations
+│   ├── tests/            ← Backend tests
+│   ├── pyproject.toml    ← Python dependencies
+│   └── .env.example      ← Environment variables template
+└── frontend/         ← Next.js app (React + Tailwind)
+    ├── app/
+    │   ├── page.js       ← Home page
+    │   ├── chat/         ← AI stylist chat
+    │   └── wardrobe/     ← Upload + view clothes
+    └── package.json
 ```
 
 ---
 
-## What happens when you upload a photo
+## ⚙️ Requirements
 
-```
-Photo uploaded
-    → FashionCLIP detects category (shirt, jeans, sneakers…)
-    → Zero-shot style tags assigned (casual, minimalist…)
-    → Dominant colors extracted (navy, white…)
-    → 512-dim embedding computed
-    → Item saved to PostgreSQL
-    → Embedding stored in Qdrant
-    → JSON response returned to client
+| Tool | Version | Download |
+|------|---------|----------|
+| Python | 3.14+ | [python.org](https://python.org) |
+| Node.js | 24+ | [nodejs.org](https://nodejs.org) |
+| Git | any | [git-scm.com](https://git-scm.com) |
+
+---
+
+## 🚀 Installation & Setup
+
+### 1. Clone the project
+```powershell
+git clone https://github.com/Fnour790/styleai.git
+cd styleai
 ```
 
-## What happens when you request today's outfit
+### 2. Backend Setup
+```powershell
+cd backend
 
+# Install uv (Python package manager)
+pip install uv
+
+# Install all dependencies
+python -m uv sync
+
+# Copy environment file and add your API key
+copy .env.example .env
+notepad .env
 ```
-GET /recommendations/today
-    → Fetch weather from Open-Meteo (free, no API key)
-    → Compute comfort_score
-    → Load user's wardrobe from PostgreSQL
-    → Score every top × bottom × shoes combination
-    → Pick the best combination
-    → Call Claude to generate a style explanation
-    → Save recommendation + return to client
+
+In `.env`, set your Anthropic API key:
+```
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+DATABASE_URL=sqlite:///./styleai.db
+```
+
+### 3. Frontend Setup
+```powershell
+cd frontend
+npm install
 ```
 
 ---
 
-## Next Steps (Phase 2)
+## ▶️ Running the App
 
-- [ ] Add JWT authentication (replace the placeholder user)
-- [ ] Build the Next.js frontend
-- [ ] Add collaborative filtering (ALS matrix factorization)
-- [ ] Add trend scraping pipeline
-- [ ] Add mood selector to the recommendation request
-- [ ] Fine-tune the outfit scorer with user swipe data (RLHF)
+You need **2 terminals open at the same time**.
+
+### Terminal 1 — Backend
+```powershell
+cd C:\Users\MSI\Downloads\styleai
+.\.venv\Scripts\Activate.ps1
+python -m uvicorn app.main:app --reload
+```
+
+Wait until you see:
+```
+FashionCLIP loaded ✓
+StyleAI ready ✓
+Application startup complete.
+```
+
+### Terminal 2 — Frontend
+```powershell
+cd C:\Users\MSI\Desktop\styleai\frontend
+npm run dev
+```
+
+Wait until you see:
+```
+Ready on http://localhost:3000
+```
+
+---
+
+## 🌐 Open in Browser
+
+| Page | URL |
+|------|-----|
+| 🏠 Home | http://localhost:3000 |
+| 👗 Wardrobe | http://localhost:3000/wardrobe |
+| 💬 AI Chat | http://localhost:3000/chat |
+| 📖 API Docs | http://localhost:8000/docs |
+
+---
+
+## 🤖 Features
+
+### 👗 Wardrobe
+- Upload photos of your clothes
+- AI automatically detects: category, colors, style tags, season
+- Powered by **FashionCLIP** (patrickjohncyh/fashion-clip)
+
+### 💬 AI Stylist Chat
+- Chat with your personal AI stylist
+- Get outfit recommendations based on your wardrobe
+- Powered by **Claude Haiku** (Anthropic)
+
+### 🌤️ Weather-aware
+- Outfit suggestions adapted to today's weather
+- Uses Open-Meteo (free, no API key needed)
+
+---
+
+## 🔧 Troubleshooting
+
+### PowerShell blocks .venv activation
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+### Backend can't find modules
+Make sure you activated the virtual environment first:
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+You should see `(styleai-backend)` at the start of your terminal line.
+
+### Frontend can't connect to backend
+Make sure the backend is running on port 8000 before starting the frontend.
+
+### FashionCLIP takes too long to load
+First load downloads ~600MB model — this is normal! After first load it's instant.
+
+---
+
+## 🗄️ Database
+
+The app uses **SQLite** (no installation needed). The database file `styleai.db` is created automatically on first run.
+
+To reset the database:
+```powershell
+python -c "from app.db.database import engine; from app.db import models; models.Base.metadata.drop_all(engine); models.Base.metadata.create_all(engine); print('DB reset!')"
+```
+
+---
+
+## 📦 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | FastAPI (Python) |
+| AI Vision | FashionCLIP |
+| AI Chat | Claude Haiku (Anthropic) |
+| Database | SQLite + SQLAlchemy |
+| Frontend | Next.js 15 + React |
+| Styling | Tailwind CSS |
+| Package Manager | uv (Python), npm (JS) |
+
+---
+
+## 🚀 Deployment (Coming Soon)
+
+| Service | Platform |
+|---------|----------|
+| Backend | Railway |
+| Frontend | Vercel |
+
+---
+
+## 👩‍💻 Author
+
+**Nour Faker** — CS Student, Tunisia 🇹🇳
+
+Built as a learning project to explore AI + full-stack web development.
+
+---
+
+## 📄 License
+
+MIT License — free to use and modify.
