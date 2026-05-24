@@ -64,13 +64,7 @@ copy .env.example .env
 notepad .env
 ```
 
-In `.env`, set your Anthropic API key:
-```
-ANTHROPIC_API_KEY=sk-ant-your-key-here
-DATABASE_URL=sqlite:///./styleai.db
-```
-
-### 3. Frontend Setup
+### 2. Frontend Setup
 ```powershell
 cd frontend
 npm install
