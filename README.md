@@ -1,6 +1,6 @@
 # 🎨 StyleAI — AI Personal Stylist
 
-> Your AI-powered fashion assistant built with FastAPI + FashionCLIP + Claude + Next.js
+> An AI-powered fashion assistant built with FastAPI + FashionCLIP + Claude + Next.js  
 > Built in Tunisia 🇹🇳 — A fashion marketplace for the future
 
 ---
@@ -52,21 +52,35 @@ cd styleai
 ### 2. Backend Setup
 ```powershell
 cd backend
-
-# Install uv (Python package manager)
 pip install uv
-
-# Install all dependencies
 python -m uv sync
+```
 
-# Copy environment file and add your API key
+### 3. Configure Environment Variables
+```powershell
 copy .env.example .env
 notepad .env
 ```
 
-### 2. Frontend Setup
+Fill in your `.env` file:
+```
+DATABASE_URL=sqlite:///./styleai.db
+ANTHROPIC_API_KEY=your-anthropic-api-key-here
+QDRANT_HOST=localhost
+QDRANT_PORT=6333
+QDRANT_COLLECTION=wardrobe_items
+APP_ENV=development
+SECRET_KEY=your-secret-key-here
+UPLOAD_DIR=./uploads
+MAX_UPLOAD_SIZE_MB=10
+WEATHER_CACHE_TTL_SECONDS=1800
+```
+
+> Get your Anthropic API key from [console.anthropic.com](https://console.anthropic.com)
+
+### 4. Frontend Setup
 ```powershell
-cd frontend
+cd ../frontend
 npm install
 ```
 
@@ -78,8 +92,8 @@ You need **2 terminals open at the same time**.
 
 ### Terminal 1 — Backend
 ```powershell
-cd C:\Users\MSI\Downloads\styleai
-.\.venv\Scripts\Activate.ps1
+cd backend
+.venv\Scripts\Activate.ps1
 python -m uvicorn app.main:app --reload
 ```
 
@@ -92,7 +106,7 @@ Application startup complete.
 
 ### Terminal 2 — Frontend
 ```powershell
-cd C:\Users\MSI\Desktop\styleai\frontend
+cd frontend
 npm run dev
 ```
 
@@ -142,7 +156,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ### Backend can't find modules
 Make sure you activated the virtual environment first:
 ```powershell
-.\.venv\Scripts\Activate.ps1
+.venv\Scripts\Activate.ps1
 ```
 You should see `(styleai-backend)` at the start of your terminal line.
 
@@ -151,6 +165,11 @@ Make sure the backend is running on port 8000 before starting the frontend.
 
 ### FashionCLIP takes too long to load
 First load downloads ~600MB model — this is normal! After first load it's instant.
+
+### Chat says "trouble connecting"
+- Check your `ANTHROPIC_API_KEY` in `.env`
+- Make sure you have credits on [console.anthropic.com](https://console.anthropic.com)
+- Restart the backend after updating `.env`
 
 ---
 
@@ -185,6 +204,14 @@ python -c "from app.db.database import engine; from app.db import models; models
 |---------|----------|
 | Backend | Railway |
 | Frontend | Vercel |
+
+---
+
+## 🔐 Security
+
+- Never commit your `.env` file to GitHub
+- Never share your API keys publicly
+- The `.gitignore` already excludes `.env`
 
 ---
 
